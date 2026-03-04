@@ -1,0 +1,15 @@
+[project]
+name = "rag-qa-project"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "chromadb>=1.5.2",
+    "dotenv>=0.9.9",
+    "langchain>=1.2.10",
+    "langchain-chroma>=1.1.0",
+    "langchain-community>=0.4.1",
+    "langchain-openai>=1.1.10",
+    "pymupdf>=1.27.1",
+]
