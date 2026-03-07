@@ -1,6 +1,6 @@
-from src.document import load_document, chunk_data
+from src.document import process_pdf
 from src.vector_db import get_vector_db
-from src.memory import get_session_id
+from src.memory import get_session_id, get_context_with_metadata
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import AIMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -16,9 +16,8 @@ def main():
     # Creating the directory if the directory doesn't exists
     if not os.path.exists("DATABASE/chroma"):
         print("Creating and Initializing Vector Database")
-        docs = load_document(file_path)
-        chunks = chunk_data(docs=docs)
-        vector_db = get_vector_db(chunks=chunks)
+        docs = process_pdf(file_path)
+        vector_db = get_vector_db(chunks=docs)
     else:
     
     # Using the Previous database if the Directory exists
@@ -34,7 +33,7 @@ def main():
         
 
         # Similarity Searching based on the input
-        context = vector_db.similarity_search(user_input, k=3)
+        context_text = get_context_with_metadata(user_input, vector_db=vector_db)
 
 
         # Creating LLM
@@ -46,7 +45,17 @@ def main():
             [
                 ('system', 'You are a helpful assistant who uses Provided context for answering questions'),
                 MessagesPlaceholder(variable_name='chat_history'),
-                ('user', 'Here is the question: {user_input} and here is context {context}')
+                ('user', """
+                    You are a professional research assistant. Use the provided context to answer the user's question.
+                    Every claim you make must be followed by a citation that uses the source and page values from the context, e.g. (Source: filname.pdf(just file name not the directory), Page: 3). If a page is unavailable, use Page: N/A.
+
+                    Context:
+                    {context}
+
+                    Question: {user_input}
+
+                    Answer:
+                    """)
             ]
         )
 
@@ -72,7 +81,7 @@ def main():
         
 
         # Streaming the answer for user
-        for chunk in llm_with_history.stream({'user_input': user_input, 'context': context}, config=config):
+        for chunk in llm_with_history.stream({'user_input': user_input, 'context': context_text}, config=config):
             if isinstance(chunk, AIMessage):
                 print(chunk.content, end='', flush=True)
 
