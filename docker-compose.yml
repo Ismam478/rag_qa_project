@@ -10,11 +10,6 @@ services:
       - IS_PERSISTENT=TRUE
       - PERSIST_DIRECTORY=/data
       - ANONYMIZED_TELEMETRY=FALSE
-    healthcheck:
-      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/heartbeat')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     volumes:
       - ./DATABASE:/data
   
@@ -23,5 +18,4 @@ services:
     container_name: rag_qa_project
     restart: always
     depends_on:
-      chroma_sql:
-        condition: service_healthy
+      - chroma_sql
