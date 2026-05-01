@@ -1,0 +1,27 @@
+#version: '0.1'
+
+services:
+  chroma_sql:
+    image: chromadb/chroma:1.5.9.dev44
+    container_name: chroma_sql
+    restart: always
+    environment:
+      # Tell Chroma where to save the data
+      - IS_PERSISTENT=TRUE
+      - PERSIST_DIRECTORY=/data
+      - ANONYMIZED_TELEMETRY=FALSE
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/heartbeat')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - ./DATABASE:/data
+  
+  rag_qa_project:
+    build: .
+    container_name: rag_qa_project
+    restart: always
+    depends_on:
+      chroma_sql:
+        condition: service_healthy
