@@ -10,7 +10,7 @@ load_dotenv(find_dotenv(), override=True)
 def main():
     print("Hello from sec-rag-eval!")
 
-    pdf_path = "E:\\Python\\My_Journey\\sec_rag_eval\\data\\apple_10_k_file.pdf"
+    pdf_path = "PDF_PATH"
     open_ai_client = OpenAI()
 
 
