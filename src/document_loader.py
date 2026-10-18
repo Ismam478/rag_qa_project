@@ -8,6 +8,17 @@ from unstructured_client.models.errors import SDKError
 
 load_dotenv(find_dotenv(), override=True)
 
+from collections import defaultdict
+
+def drop_running_headers_footers(elements, page_share=0.3, max_len=100):
+    norm = lambda t: re.sub(r"\d+", "#", t.strip().lower())
+    pages = {e["metadata"].get("page_number") for e in elements}
+    seen = defaultdict(set)
+    for e in elements:
+        seen[norm(e["text"])].add(e["metadata"].get("page_number"))
+    bad = {k for k, p in seen.items() if 6 < len(k) < max_len and len(p) >= page_share * len(pages)}
+    return [e for e in elements if norm(e["text"]) not in bad]
+
 def load_pdf(pdf_path: str):
     if not os.path.exists(pdf_path):
         raise FileNotFoundError(f"PDF not found: {pdf_path}")
@@ -34,6 +45,8 @@ def load_pdf(pdf_path: str):
             
             cleaned_elements = []
             seen_texts = set()
+
+            cleaned_elements = drop_running_headers_footers(response.elements)
 
             print("2. Filtering footers, headers, duplicates, and junk...\n")
 

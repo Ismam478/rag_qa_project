@@ -34,10 +34,10 @@ You'll need Python 3.12+ to run this.
 
 To run the ingestion and chat with the document:
 ```bash
-python main_4.py
+python main.py
 ```
 
 To run the evaluation pipeline and generate a grading report:
 ```bash
-python evaluate_pipeline_2.py
+python evaluate_pipeline.py
 ```
